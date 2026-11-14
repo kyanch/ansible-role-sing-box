@@ -12,11 +12,6 @@ Documentation=https://sing-box.sagernet.org
 {% endif %}
 
 [Service]
-DynamicUser=yes
-User={{ sing_box_user }}
-Group={{ sing_box_user }}
-SupplementaryGroups={{ sing_box_config_group }}
-StateDirectory={{ sing_box_user }}
 ExecStart={{ sing_box_binary_path }}/sing-box run -c {{ sing_box_config_path }}/sing-box.json
 {% if sing_box_service_options is defined and sing_box_service_options.items() | length > 0 %}
 {% for k, v in sing_box_service_options.items() %}

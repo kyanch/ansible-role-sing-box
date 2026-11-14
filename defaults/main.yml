@@ -6,7 +6,7 @@ sing_box_version: 1.14.4
 sing_box_arch_map:
   x86_64: amd64
   aarch64: arm64
-sing_box_arch: "{{ sing_box_arch_map[ansible_architecture] }}"
+sing_box_arch: "{{ sing_box_arch_map[ansible_facts['architecture']] }}"
 
 sing_box_release_base: "https://github.com/SagerNet/sing-box/releases/download/v{{ sing_box_version }}"
 sing_box_archive_name: "sing-box-{{ sing_box_version }}-linux-{{ sing_box_arch }}.tar.gz"
@@ -17,13 +17,19 @@ sing_box_service_name: sing-box
 sing_box_config_group: sing-box-config
 sing_box_config_path: "/etc/{{ sing_box_service_name }}"
 sing_box_config_mode: '0640'
+sing_box_sub_url: ""
 sing_box_config: |
   define your own sing box config (here you may use jinja for templating)
+
 sing_box_default_unit_options:
   Wants: network-online.target
   After: network-online.target
 sing_box_default_service_options:
+  DynamicUser: true
   User: "{{ sing_box_user }}"
+  Group: "{{ sing_box_user }}"
+  SupplementaryGroups: "{{ sing_box_config_group }}"
+  StateDirectory: "{{ sing_box_user }}"
   Restart: always
   TimeoutStopSec: 5s
   LimitNOFILE: 1048576

@@ -3,7 +3,7 @@
 ---
 - name: add sing-box config group
   ansible.builtin.group:
-    name: "{{ singbox_config_group }}"
+    name: "{{ sing_box_config_group }}"
 
 - name: mkdir config dir
   ansible.builtin.file:
@@ -20,7 +20,24 @@
     - enable sing-box
     - restart sing-box
 
-- name: render config
+- name: fetch remote config to override sing_box_config
+  no_log: true
+  when:
+    - sing_box_sub_url | default('') | length > 0
+  block:
+    - name: Fetch remote config to override sing_box_config
+      ansible.builtin.uri:
+        url: "{{ sing_box_sub_url }}"
+        method: GET
+        return_content: true
+        status_code: 200
+      register: sing_box_sub_response
+
+    - name: Override sing_box_config
+      ansible.builtin.set_fact:
+        sing_box_config: "{{ sing_box_sub_response.content }}"
+
+- name: render local config
   ansible.builtin.copy:
     content: "{{ sing_box_config }}"
     dest: "{{ sing_box_config_path }}/sing-box.json"
