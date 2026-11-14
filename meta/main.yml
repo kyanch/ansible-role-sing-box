@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   role_name: sing_box
-  author: foi
+  author: kyanch
   description: sing-box ansible role
   platforms:
     - name: Fedora

@@ -1,0 +1,11 @@
+[project]
+name = "ansible-role-sing-box"
+version = "0.1.0"
+requires-python = ">=3.9,<3.14"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ansible-core>=2.15.13",
+    "ruff>=0.17.5",
+]
