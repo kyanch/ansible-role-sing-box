@@ -20,9 +20,17 @@
     - enable sing-box
     - restart sing-box
 
+- name: build config with outbounds subs and base config
+  no_log: true
+  when:
+    - sing_box_build_sub_config.enable | default(false) | bool
+  ansible.builtin.import_tasks:
+    file: subscription.yml
+
 - name: fetch remote config to override sing_box_config
   no_log: true
   when:
+    - not (sing_box_build_sub_config.enable | default(false) | bool)
     - sing_box_sub_url | default('') | length > 0
   block:
     - name: Fetch remote config to override sing_box_config

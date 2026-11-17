@@ -1,0 +1,63 @@
+---
+- name: fetch mihomo outbounds
+  when: sing_box_build_sub_config.outbounds_subs.mihomo | length > 0
+  block:
+    - name: fetch mihomo subscription
+      ansible.builtin.uri:
+        url: "{{ sing_box_build_sub_config.outbounds_subs.mihomo }}"
+        method: GET
+        return_content: true
+      register: sing_box_mihomo_rawcontent
+
+    - name: parse mihomo yaml
+      ansible.builtin.set_fact:
+        sing_box_mihomo_content: "{{ sing_box_mihomo_rawcontent.content | from_yaml }}"
+
+    - name: convert mihomo to sing-box outbounds
+      ansible.builtin.set_fact:
+        sing_box_mihomo_outbounds: >-
+          {{
+            (lookup('ansible.builtin.template', 'homo2outbounds.json.j2',
+              template_vars={
+                'mihomo_config': sing_box_mihomo_content
+              })
+            | from_json).outbounds
+          }}
+
+    - name: show mihomo outbounds
+      ansible.builtin.debug:
+        var: sing_box_mihomo_outbounds
+
+- name: fetch sing-box outbounds
+  when: sing_box_build_sub_config.outbounds_subs.singbox | length > 0
+  block:
+    - name: fetch sing-box subscription
+      ansible.builtin.uri:
+        url: "{{ sing_box_build_sub_config.outbounds_subs.singbox }}"
+        method: GET
+        return_content: true
+      register: sing_box_singbox_rawcontent
+
+    - name: parse sing-box json
+      ansible.builtin.set_fact:
+        sing_box_singbox_outbounds: "{{ (sing_box_singbox_rawcontent.content | from_json).outbounds }}"
+
+    - name: show sing-box config
+      ansible.builtin.debug:
+        var: sing_box_singbox_outbounds
+
+- name: test
+  ansible.builtin.debug:
+    msg:
+      - "base: {{ sing_box_build_sub_config.base | default([]) | type_debug }}"
+- name: merge sing-box configuration
+  ansible.builtin.set_fact:
+    sing_box_config: >-
+      {{
+        sing_box_build_sub_config.base | combine({
+          'outbounds':
+           ( sing_box_singbox_outbounds | default([]))
+          +( sing_box_mihomo_outbounds | default([]))
+          +( sing_box_build_sub_config.base.outbounds | default([]))
+        })
+      }}

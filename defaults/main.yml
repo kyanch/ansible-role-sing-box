@@ -17,6 +17,15 @@ sing_box_service_name: sing-box
 sing_box_config_group: sing-box-config
 sing_box_config_path: "/etc/{{ sing_box_service_name }}"
 sing_box_config_mode: '0640'
+
+# build sing-box config with custom base_config and outbounds from subs
+sing_box_build_sub_config:
+  enable: false
+  base: "{{ lookup('ansible.builtin.file', role_path ~ '/files/base.json') | from_json }}"
+  outbounds_subs:
+    singbox: ""
+    mihomo: ""
+
 sing_box_sub_url: ""
 sing_box_config: |
   define your own sing box config (here you may use jinja for templating)

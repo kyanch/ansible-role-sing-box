@@ -1,0 +1,14 @@
+---
+- name: Test sing-box config build
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Test build config
+      ansible.builtin.include_role:
+        name: "{{ playbook_dir }}/.."
+        tasks_from: subscription
+    - name: write config
+      ansible.builtin.copy:
+        content: "{{ sing_box_config | to_nice_json(indent=2, ensure_ascii=False) }}"
+        dest: ./config.json

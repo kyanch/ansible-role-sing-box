@@ -1,0 +1,68 @@
+{
+    "$schema": "https://sing-box.sagernet.org/schema.json",
+  "dns": {
+    "servers": [
+      {
+        "tag": "google",
+        "type": "tls",
+        "server": "8.8.8.8"
+      },
+      {
+        "tag": "local",
+        "type": "udp",
+        "server": "223.5.5.5"
+      }
+    ]
+  },
+    "experimental": {
+        "cache_file": {
+            "enabled": true
+        },
+        "clash_api": {
+            "default_mode": "Auto"
+        }
+    },
+    "inbounds": [
+        {
+            "type": "direct",
+            "tag": "dns-in",
+            "listen": "::",
+            "listen_port": 53053
+        },
+        {
+            "type": "http",
+            "tag": "http-in",
+            "listen": "::",
+            "listen_port": 7890
+        },
+        {
+            "type": "socks",
+            "tag": "socks-in",
+            "listen": "::",
+            "listen_port": 7891
+        }
+    ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "action": "sniff"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      }
+    ],
+    "default_domain_resolver": "local",
+    "auto_detect_interface": true
+  }
+}

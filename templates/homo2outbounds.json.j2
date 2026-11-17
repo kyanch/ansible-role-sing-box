@@ -1,0 +1,66 @@
+{% set ns = namespace(outbounds=[]) %}
+
+{% for proxy in mihomo_config.proxies | default([]) %}
+{% if proxy.type == 'vless' %}
+
+{% set outbound = {
+  'type': 'vless',
+  'tag': proxy.name,
+  'server': proxy.server,
+  'server_port': proxy.port,
+  'uuid': proxy.uuid
+} %}
+
+{% if proxy.flow is defined %}
+{% set _ = outbound.update({'flow': proxy.flow}) %}
+{% endif %}
+
+{% if proxy.tls | default(false) %}
+{% set tls = {'enabled': true} %}
+
+{% if proxy.servername is defined %}
+{% set _ = tls.update({'server_name': proxy.servername}) %}
+{% endif %}
+
+{% if proxy['skip-cert-verify'] | default(false) %}
+{% set _ = tls.update({'insecure': true}) %}
+{% endif %}
+
+{% if proxy.alpn is defined %}
+{% set _ = tls.update({'alpn': proxy.alpn}) %}
+{% endif %}
+
+{% if proxy['reality-opts'] is defined %}
+{% set reality = {
+  'enabled': true,
+  'public_key': proxy['reality-opts']['public-key'],
+  'short_id': proxy['reality-opts']['short-id'] | default('')
+} %}
+{% set _ = tls.update({'reality': reality}) %}
+{% endif %}
+
+{% if proxy['client-fingerprint'] is defined %}
+{% set _ = tls.update({
+  'utls': {
+    'enabled': true,
+    'fingerprint': proxy['client-fingerprint']
+  }
+}) %}
+{% endif %}
+
+{% set _ = outbound.update({'tls': tls}) %}
+{% endif %}
+
+{% set _ = ns.outbounds.append(outbound) %}
+{% endif %}
+{% endfor %}
+
+{% set tags = ns.outbounds | map(attribute='tag') | list %}
+
+{% set _ = ns.outbounds.append({
+  'type': 'selector',
+  'tag': 'homo',
+  'outbounds': tags
+}) %}
+
+{{ {'outbounds': ns.outbounds} | to_json }}
