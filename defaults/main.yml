@@ -39,6 +39,7 @@ sing_box_default_service_options:
   Group: "{{ sing_box_user }}"
   SupplementaryGroups: "{{ sing_box_config_group }}"
   StateDirectory: "{{ sing_box_user }}"
+  WorkingDirectory: "/var/lib/{{ sing_box_user }}"
   Restart: always
   TimeoutStopSec: 5s
   LimitNOFILE: 1048576
